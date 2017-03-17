@@ -2,11 +2,20 @@ package GoPrintTable
 
 import "fmt"
 
-func getMaxColWidth(table [][]string) []int {
-	if len(table) == 0 {
-		return nil
+
+// GoPrintTable print beautiful table.
+type GoPrintTable struct {
+	Table [][]string
+	WithHeader bool
+}
+
+// getMaxColWidth Find biggest value (length) per column, and return slice of
+// int, where each value represent column with same index.
+func (g *GoPrintTable) getMaxColWidth() ([]int, error) {
+	if len(g.Table) == 0 {
+		return nil, fmt.Errorf("Table is empty.")
 	}
-	columnCount := getMaxColCount(table)
+	columnCount := g.getMaxColCount()
 	var result []int
 	var colW int
 
@@ -14,7 +23,7 @@ func getMaxColWidth(table [][]string) []int {
 		result = append(result, 0)
 	}
 
-	for _, row := range table {
+	for _, row := range g.Table {
 		for colI, col := range row {
 			colW = len(col)
 			if colW > result[colI] {
@@ -23,12 +32,13 @@ func getMaxColWidth(table [][]string) []int {
 		}
 	}
 
-	return result
+	return result, nil
 }
 
-func getMaxColCount(table [][]string) int {
+// getMaxColCount Find row with Max count of elements and return len(row)
+func  (g *GoPrintTable) getMaxColCount() int {
 	result := 0
-	for _, row := range table {
+	for _, row := range g.Table {
 		if len(row) > result {
 			result = len(row)
 		}
@@ -36,12 +46,13 @@ func getMaxColCount(table [][]string) int {
 	return result
 }
 
-func fillTableValues(table [][]string, sizes []int) [][]string {
+// fillTableValues append spaces to column values to have same len(col) per col
+func  (g *GoPrintTable) fillTableValues(sizes []int) {
 	var diffW int
 	var colW int
 	var tailEnd string
 
-	for rowI, row := range table {
+	for rowI, row := range g.Table {
 		for colI, col := range row {
 			colW = len(col)
 			diffW = sizes[colI] - colW
@@ -50,45 +61,47 @@ func fillTableValues(table [][]string, sizes []int) [][]string {
 			for i:=0; i!=diffW; i++ {
 				tailEnd += " "
 			}
-			table[rowI][colI] = table[rowI][colI] + tailEnd
+			g.Table[rowI][colI] = g.Table[rowI][colI] + tailEnd
 		}
 	}
-
-	return table
 }
 
-func fillTableWithColumns(table [][]string, count int) [][]string {
+// fillTableWithColumns for each row, append empty values to slice til
+// len(row) == sizes
+func  (g *GoPrintTable) fillTableWithColumns(count int) {
 	var wasChanged bool
 	for ;; {
 		wasChanged = false
-		for i, row := range table {
+		for i, row := range g.Table {
 			if len(row) != count {
-				table[i] = append(table[i], "-")
+				g.Table[i] = append(g.Table[i], "-")
 				wasChanged = true
 			}
 		}
 		if wasChanged == false {
-			return table
+			return
 		}
 
 	}
 }
 
-func printLine(width int){
+// printLine print separator line
+func  (g *GoPrintTable) printLine(width int){
 	for i:=1; i!=width; i+=1{
 		fmt.Print("-")
 	}
 	fmt.Println("")
 }
 
-func printIt(table [][]string, withHeader bool){
-	if len(table) == 0 {
+// printIt join values and print them as table
+func  (g *GoPrintTable) printIt(withHeader bool){
+	if len(g.Table) == 0 {
 		return
 	}
 
 	var rowStr string
 	var rows []string
-	for _, row := range table {
+	for _, row := range g.Table {
 		rowStr = "| "
 		for _, col := range row {
 			rowStr = rowStr + col + " | "
@@ -97,31 +110,40 @@ func printIt(table [][]string, withHeader bool){
 	}
 	tableWidth := len(rows[0])
 
-	printLine(tableWidth)
+	g.printLine(tableWidth)
 	for i, row := range rows{
 		fmt.Println(row)
 		if i == 0 && withHeader {
-			printLine(tableWidth)
+			g.printLine(tableWidth)
 		}
 	}
-	printLine(tableWidth)
+	g.printLine(tableWidth)
 }
 
-func printTable(table [][]string, withHeader bool) {
-	maxColWidth := getMaxColWidth(table)
-	maxColCount := getMaxColCount(table)
+// printTable do math and pass result to printIt()
+func  (g *GoPrintTable) printTable() {
+	maxColWidth, err := g.getMaxColWidth()
+	if err != nil{
+		fmt.Println(err.Error())
+		return
+	}
+	maxColCount := g.getMaxColCount()
 
+	g.fillTableWithColumns(maxColCount)
+	g.fillTableValues(maxColWidth)
 
-	tableSized := fillTableWithColumns(table, maxColCount)
-	tableFilled := fillTableValues(tableSized, maxColWidth)
-
-	printIt(tableFilled, withHeader)
+	g.printIt(g.WithHeader)
 }
 
+// PrintTableWithHeader does formatted print of [][]string in beautiful ascii
+// table with separate header that should be first row in argument.
 func PrintTableWithHeader(table [][]string) {
-	printTable(table, true)
+	var g = GoPrintTable{table, true}
+	g.printTable()
 }
 
+// PrintTable does formatted print of [][]string in beautiful ascii table.
 func PrintTable(table [][]string) {
-	printTable(table, false)
+	var g = GoPrintTable{table, false}
+	g.printTable()
 }
