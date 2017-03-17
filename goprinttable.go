@@ -2,10 +2,9 @@ package GoPrintTable
 
 import "fmt"
 
-
 // GoPrintTable print beautiful table.
 type goPrintTable struct {
-	Table [][]string
+	Table      [][]string
 	WithHeader bool
 }
 
@@ -19,7 +18,7 @@ func (g *goPrintTable) getMaxColWidth() ([]int, error) {
 	var result []int
 	var colW int
 
-	for i:=0; i<columnCount; i+=1 {
+	for i := 0; i < columnCount; i += 1 {
 		result = append(result, 0)
 	}
 
@@ -36,7 +35,7 @@ func (g *goPrintTable) getMaxColWidth() ([]int, error) {
 }
 
 // getMaxColCount Find row with Max count of elements and return len(row)
-func  (g *goPrintTable) getMaxColCount() int {
+func (g *goPrintTable) getMaxColCount() int {
 	result := 0
 	for _, row := range g.Table {
 		if len(row) > result {
@@ -47,7 +46,7 @@ func  (g *goPrintTable) getMaxColCount() int {
 }
 
 // fillTableValues append spaces to column values to have same len(col) per col
-func  (g *goPrintTable) fillTableValues(sizes []int) {
+func (g *goPrintTable) fillTableValues(sizes []int) {
 	var diffW int
 	var colW int
 	var tailEnd string
@@ -58,7 +57,7 @@ func  (g *goPrintTable) fillTableValues(sizes []int) {
 			diffW = sizes[colI] - colW
 
 			tailEnd = ""
-			for i:=0; i!=diffW; i++ {
+			for i := 0; i != diffW; i++ {
 				tailEnd += " "
 			}
 			g.Table[rowI][colI] = g.Table[rowI][colI] + tailEnd
@@ -68,9 +67,9 @@ func  (g *goPrintTable) fillTableValues(sizes []int) {
 
 // fillTableWithColumns for each row, append empty values to slice til
 // len(row) == sizes
-func  (g *goPrintTable) fillTableWithColumns(count int) {
+func (g *goPrintTable) fillTableWithColumns(count int) {
 	var wasChanged bool
-	for ;; {
+	for {
 		wasChanged = false
 		for i, row := range g.Table {
 			if len(row) != count {
@@ -86,15 +85,15 @@ func  (g *goPrintTable) fillTableWithColumns(count int) {
 }
 
 // printLine print separator line
-func  (g *goPrintTable) printLine(width int){
-	for i:=1; i!=width; i+=1{
+func (g *goPrintTable) printLine(width int) {
+	for i := 1; i != width; i += 1 {
 		fmt.Print("-")
 	}
 	fmt.Println("")
 }
 
 // printIt join values and print them as table
-func  (g *goPrintTable) printIt(withHeader bool){
+func (g *goPrintTable) printIt(withHeader bool) {
 	if len(g.Table) == 0 {
 		return
 	}
@@ -111,7 +110,7 @@ func  (g *goPrintTable) printIt(withHeader bool){
 	tableWidth := len(rows[0])
 
 	g.printLine(tableWidth)
-	for i, row := range rows{
+	for i, row := range rows {
 		fmt.Println(row)
 		if i == 0 && withHeader {
 			g.printLine(tableWidth)
@@ -121,9 +120,9 @@ func  (g *goPrintTable) printIt(withHeader bool){
 }
 
 // printTable do math and pass result to printIt()
-func  (g *goPrintTable) printTable() {
+func (g *goPrintTable) printTable() {
 	maxColWidth, err := g.getMaxColWidth()
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
