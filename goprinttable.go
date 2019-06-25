@@ -12,7 +12,7 @@ type goPrintTable struct {
 // int, where each value represent column with same index.
 func (g *goPrintTable) getMaxColWidth() ([]int, error) {
 	if len(g.Table) == 0 {
-		return nil, fmt.Errorf("Table is empty.")
+		return nil, fmt.Errorf("table is empty")
 	}
 	columnCount := g.getMaxColCount()
 	var result []int
@@ -92,6 +92,83 @@ func (g *goPrintTable) printLine(width int) {
 	fmt.Println("")
 }
 
+func (g *goPrintTable) formatLine(width int) string {
+	var l string
+	for i := 1; i != width; i += 1 {
+		l += fmt.Sprint("-")
+	}
+	l += fmt.Sprint("\n")
+	return " " + l
+}
+
+func (g goPrintTable) expectedLength() int {
+	var l int
+	var max int
+	var colCount int
+
+	for _, row := range g.Table {
+		l = 0
+		colCount = 0
+		for _, col := range row {
+			l += len(col)
+			colCount += 1
+		}
+
+		// 3 is spacer to the left from col " | ", and 2 last after last col " |"
+		l = l + (colCount * 3) + 2
+		if l > max {
+			max = l
+		}
+	}
+	return max
+}
+
+func (g *goPrintTable) formatRow(row []string, isHeader bool) string {
+	var rowStr string
+
+	tableWidth := g.expectedLength()
+
+	for _, col := range row {
+		rowStr = rowStr + " | " + col
+	}
+	rowStr = rowStr + " |\n"
+
+	if isHeader {
+		rowStr = g.formatLine(tableWidth) + rowStr + g.formatLine(tableWidth)
+	}
+	return rowStr
+}
+
+
+func (g *goPrintTable) formatTable(withHeader bool) string {
+	if len(g.Table) == 0 {
+		return ""
+	}
+
+	maxColWidth, err := g.getMaxColWidth()
+	if err != nil {
+		fmt.Println(err.Error())
+		return ""
+	}
+	maxColCount := g.getMaxColCount()
+
+	g.fillTableWithColumns(maxColCount)
+	g.fillTableValues(maxColWidth)
+
+
+	var stringTable string
+
+	tableWidth := g.expectedLength()
+
+	for i, row := range g.Table {
+		firstRow := i == 0
+		stringTable += g.formatRow(row, firstRow && withHeader)
+	}
+	stringTable += g.formatLine(tableWidth)
+
+	return stringTable
+}
+
 // printIt join values and print them as table
 func (g *goPrintTable) printIt(withHeader bool) {
 	if len(g.Table) == 0 {
@@ -145,4 +222,10 @@ func PrintTableWithHeader(table [][]string) {
 func PrintTable(table [][]string) {
 	var g = goPrintTable{table, false}
 	g.printTable()
+}
+
+
+func GetStringTableWithHeader(table [][]string, header bool) string {
+	var g = goPrintTable{table, header}
+	return g.formatTable(true)
 }

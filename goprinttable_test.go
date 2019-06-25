@@ -1,7 +1,8 @@
 package GoPrintTable
 
-import "testing"
-
+import (
+	"testing"
+)
 
 func getTavleExample() [][]string {
 	header := []string{"Node Name", "IP", "Status"}
@@ -12,7 +13,7 @@ func getTavleExample() [][]string {
 	return t
 }
 
-func TestGetMaxColWidth(t *testing.T){
+func TestGetMaxColWidth(t *testing.T) {
 	table := getTavleExample()
 	var g = goPrintTable{table, false}
 	maxColWidth, _ := g.getMaxColWidth()
@@ -31,7 +32,7 @@ func TestGetMaxColWidth(t *testing.T){
 
 }
 
-func TestGetMaxColCount(t *testing.T){
+func TestGetMaxColCount(t *testing.T) {
 	table := getTavleExample()
 	var g = goPrintTable{table, false}
 	maxColCount := g.getMaxColCount()
@@ -40,7 +41,7 @@ func TestGetMaxColCount(t *testing.T){
 	}
 }
 
-func TestFillTableWithColumns(t *testing.T){
+func TestFillTableWithColumns(t *testing.T) {
 	table := getTavleExample()
 	var g = goPrintTable{table, false}
 	maxColCount := g.getMaxColCount()
@@ -48,16 +49,16 @@ func TestFillTableWithColumns(t *testing.T){
 
 	firstRowLen := len(g.Table[0])
 
-	for k, v := range g.Table{
-		if firstRowLen != len(v){
-			t.Errorf("Rows was not alligned properly. Row len(%s)" +
+	for k, v := range g.Table {
+		if firstRowLen != len(v) {
+			t.Errorf("Rows was not alligned properly. Row len(%s)"+
 				" != len(%s) ", g.Table[0], g.Table[k])
 		}
 	}
 
 }
 
-func TestFillTableValues(t *testing.T){
+func TestFillTableValues(t *testing.T) {
 	table := getTavleExample()
 
 	var g = goPrintTable{table, false}
@@ -69,7 +70,7 @@ func TestFillTableValues(t *testing.T){
 	g.fillTableValues(maxColWidth)
 
 	rowLen := len(g.Table[0])
-	for i:=0; i<rowLen; i+=1 {
+	for i := 0; i < rowLen; i += 1 {
 		basicLen := len(g.Table[0][i])
 
 		for k := range g.Table {
@@ -78,5 +79,45 @@ func TestFillTableValues(t *testing.T){
 			}
 		}
 
+	}
+}
+
+func TestGetStringTableWithHeader(t *testing.T) {
+	type args struct {
+		table  [][]string
+		header bool
+	}
+
+	simpleTableResult :=
+` ----------------
+ | Name   | Age |
+ ----------------
+ | Donald | 3   |
+ ----------------
+`
+
+	unevenTableResult :=
+` ----------------
+ | Name   | Age |
+ ----------------
+ | Donald | -   |
+ ----------------
+`
+
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"Simple table", args{[][]string{[]string{"Name", "Age"}, []string{"Donald", "3"}}, true}, simpleTableResult},
+		{"Uneven table", args{[][]string{[]string{"Name", "Age"}, []string{"Donald"}}, true}, unevenTableResult},
+		{"Empty table", args{[][]string{}, true}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetStringTableWithHeader(tt.args.table, tt.args.header); got != tt.want {
+				t.Errorf("GetStringTableWithHeader() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
