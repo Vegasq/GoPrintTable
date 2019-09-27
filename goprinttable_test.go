@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func getTavleExample() [][]string {
+func getTableExample() [][]string {
 	header := []string{"Node Name", "IP", "Status"}
 	node1 := []string{"controller", "192.168.0.100", "Online"}
 	node2 := []string{"minion1", "192.168.0.101", "Offline"}
@@ -14,7 +14,7 @@ func getTavleExample() [][]string {
 }
 
 func TestGetMaxColWidth(t *testing.T) {
-	table := getTavleExample()
+	table := getTableExample()
 	var g = goPrintTable{table, false}
 	maxColWidth, _ := g.getMaxColWidth()
 	if maxColWidth[0] != 10 {
@@ -33,7 +33,7 @@ func TestGetMaxColWidth(t *testing.T) {
 }
 
 func TestGetMaxColCount(t *testing.T) {
-	table := getTavleExample()
+	table := getTableExample()
 	var g = goPrintTable{table, false}
 	maxColCount := g.getMaxColCount()
 	if maxColCount != 3 {
@@ -42,7 +42,7 @@ func TestGetMaxColCount(t *testing.T) {
 }
 
 func TestFillTableWithColumns(t *testing.T) {
-	table := getTavleExample()
+	table := getTableExample()
 	var g = goPrintTable{table, false}
 	maxColCount := g.getMaxColCount()
 	g.fillTableWithColumns(maxColCount)
@@ -59,7 +59,7 @@ func TestFillTableWithColumns(t *testing.T) {
 }
 
 func TestFillTableValues(t *testing.T) {
-	table := getTavleExample()
+	table := getTableExample()
 
 	var g = goPrintTable{table, false}
 

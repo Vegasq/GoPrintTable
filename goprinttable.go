@@ -1,11 +1,15 @@
 package GoPrintTable
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // GoPrintTable print beautiful table.
 type goPrintTable struct {
 	Table      [][]string
 	WithHeader bool
+
+	savedExpectedLength int
 }
 
 // getMaxColWidth Find biggest value (length) per column, and return slice of
@@ -37,6 +41,7 @@ func (g *goPrintTable) getMaxColWidth() ([]int, error) {
 // getMaxColCount Find row with Max count of elements and return len(row)
 func (g *goPrintTable) getMaxColCount() int {
 	result := 0
+
 	for _, row := range g.Table {
 		if len(row) > result {
 			result = len(row)
@@ -101,7 +106,10 @@ func (g *goPrintTable) formatLine(width int) string {
 	return " " + l
 }
 
-func (g goPrintTable) expectedLength() int {
+func (g *goPrintTable) expectedLength() int {
+	if g.savedExpectedLength > 0 {
+		return g.savedExpectedLength
+	}
 	var l int
 	var max int
 	var colCount int
@@ -120,6 +128,7 @@ func (g goPrintTable) expectedLength() int {
 			max = l
 		}
 	}
+	g.savedExpectedLength = max
 	return max
 }
 
@@ -150,6 +159,7 @@ func (g *goPrintTable) formatTable(withHeader bool) string {
 		fmt.Println(err.Error())
 		return ""
 	}
+
 	maxColCount := g.getMaxColCount()
 
 	g.fillTableWithColumns(maxColCount)
@@ -214,18 +224,18 @@ func (g *goPrintTable) printTable() {
 // PrintTableWithHeader does formatted print of [][]string in beautiful ascii
 // table with separate header that should be first row in argument.
 func PrintTableWithHeader(table [][]string) {
-	var g = goPrintTable{table, true}
+	var g = goPrintTable{table, true, 0}
 	g.printTable()
 }
 
 // PrintTable does formatted print of [][]string in beautiful ascii table.
 func PrintTable(table [][]string) {
-	var g = goPrintTable{table, false}
+	var g = goPrintTable{table, false, 0}
 	g.printTable()
 }
 
 
 func GetStringTableWithHeader(table [][]string, header bool) string {
-	var g = goPrintTable{table, header}
+	var g = goPrintTable{table, header, 0}
 	return g.formatTable(true)
 }
